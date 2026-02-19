@@ -1,0 +1,27 @@
+{
+    "author": "Robert Meissner ",
+    "bugs": {
+        "url": "https://github.com/vanillaspa/event-bus/issues"
+    },
+    "description": "An Event Bus written in <50 LOC vanilla JS. You can use it with standard WebComponents.",
+    "homepage": "https://github.com/vanillaspa/event-bus#readme",
+    "keywords": [
+        "EventBus",
+        "JavaScript",
+        "Module",
+        "Vanilla",
+        "SPA"
+    ],
+    "license": "Unlicense",
+    "main": "index.js",
+    "name": "@vanillaspa/event-bus",
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/vanillaspa/event-bus.git"
+    },
+    "type": "module",
+    "version": "1.0.0"
+}
