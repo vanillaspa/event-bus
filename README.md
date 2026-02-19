@@ -1,6 +1,6 @@
 ## Getting started
 
-To install the eventbus into your project, simply run
+To install the event-bus into your project, simply run
 
 ```bash
 npm install @vanillaspa/event-bus
