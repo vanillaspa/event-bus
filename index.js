@@ -43,15 +43,12 @@ export function removeEventListener(type, listener, context = undefined, options
         }
     } else {
         window.removeEventListener(type, listener);
-        worker.port.postMessage({ ction: 'removeEventListener', type });
+        worker.port.postMessage({ action: 'removeEventListener', type });
     }
 }
 
 export function dispatchEvent(event) {
-    if (!context) {
-        if (event instanceof CustomEvent) context = event.detail?.target;
-        else context = event.target;
-    }
+    const context = event instanceof CustomEvent ? event.detail?.target : event.target;
     if (context && contextListeners.has(context)) {
         const byType = contextListeners.get(context);
         byType.get(event.type)?.forEach(handler => handler(event));
