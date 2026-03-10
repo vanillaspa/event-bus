@@ -1,5 +1,5 @@
 export const name = "eventbus";
-const worker = new ServiceWorker(new URL('./eventbusWorker.js', import.meta.url), { type: 'module' });
+const worker = new SharedWorker(new URL('./eventbusWorker.js', import.meta.url), { type: 'module' });
 worker.port.start();
 
 const contextListeners = new WeakMap(); // WeakMap to store listeners per object. Keep it private unless you know what you do.

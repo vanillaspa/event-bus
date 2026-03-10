@@ -10,7 +10,7 @@
         "JavaScript",
         "Module",
         "Vanilla",
-        "ServiceWorker",
+        "SharedWorker",
         "SPA",
         "WebComponents"
     ],
@@ -25,5 +25,5 @@
         "url": "git+https://github.com/vanillaspa/event-bus.git"
     },
     "type": "module",
-    "version": "1.2.0"
+    "version": "1.2.1"
 }
