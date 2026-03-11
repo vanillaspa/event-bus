@@ -49,7 +49,7 @@ export function removeEventListener(type, listener, context = undefined) {
     }
 }
 
-export function dispatchEvent(event) {
+export function dispatchEvent(event, context = undefined) {
     dispatchLocally(event, context);
     channel.postMessage({
         type: event.type,
