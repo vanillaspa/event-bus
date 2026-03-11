@@ -37,20 +37,32 @@ export function removeEventListener(type, listener, context) {
     }
 }
 
+export function removeAllEventListeners(context) {
+    contextListeners.delete(context);
+    for (const refs of typeIndex.values()) {
+        for (const ref of refs) {
+            if (ref.deref() === context) {
+                refs.delete(ref);
+                break;
+            }
+        }
+    }
+}
+
 export function dispatchEvent(event, context = undefined) {
     if (!context) context = event instanceof CustomEvent ? event.detail?.target : event.target;
 
     if (context && contextListeners.has(context)) {
         const byType = contextListeners.get(context);
         byType.get(event.type)?.forEach(handler => handler(event));
-    } else {
-        const refs = typeIndex.get(event.type);
-        if (refs) {
-            for (const ref of refs) {
-                const ctx = ref.deref();
-                if (!ctx) { refs.delete(ref); continue; }
-                contextListeners.get(ctx)?.get(event.type)?.forEach(handler => handler(event));
-            }
+    }
+
+    const refs = typeIndex.get(event.type);
+    if (refs) {
+        for (const ref of refs) {
+            const ctx = ref.deref();
+            if (!ctx) { refs.delete(ref); continue; }
+            contextListeners.get(ctx)?.get(event.type)?.forEach(handler => handler(event));
         }
     }
 }
