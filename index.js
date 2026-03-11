@@ -1,5 +1,5 @@
-export const name = "eventbus";
-const channel = new BroadcastChannel();
+export const name = 'eventbus';
+const channel = new BroadcastChannel('eventbus');
 const contextListeners = new WeakMap(); // context - Map<type, listener[]>
 
 channel.onmessage = ({ data }) => {
@@ -31,7 +31,7 @@ export function addEventListener(type, listener, context = undefined) {
         if (!byType.has(type)) byType.set(type, []);
         byType.get(type).push(listener);
     } else {
-        if (context) throw new Error("Syntax error: context must be an object.");
+        if (context) throw new Error('Syntax error: context must be an object.');
         if (typeof window !== 'undefined') window.addEventListener(type, listener);
     }
 }
