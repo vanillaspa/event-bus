@@ -1,58 +1,56 @@
 export const name = 'eventbus';
-const channel = new BroadcastChannel('eventbus');
-const contextListeners = new WeakMap(); // context - Map<type, listener[]>
 
-channel.onmessage = ({ data }) => {
-    const { type, detail } = data;
-    dispatchLocally(new CustomEvent(type, { detail }));
+const contextListeners = new WeakMap(); // context -> Map<type, listener[]>
+const typeIndex = new Map();            // type -> Set<WeakRef<context>>
+
+export function addEventListener(type, listener, context) {
+    if (!contextListeners.has(context)) { // first seen
+        contextListeners.set(context, new Map());
+    }
+    const byType = contextListeners.get(context);
+    if (!byType.has(type)) byType.set(type, []);
+    byType.get(type).push(listener);
+
+    if (!typeIndex.has(type)) typeIndex.set(type, new Set());
+    typeIndex.get(type).add(new WeakRef(context));
 }
 
-channel.onmessageerror = (e) => {
-    console.error('eventbus deserialization error:', e);
+export function removeEventListener(type, listener, context) {
+    const byType = contextListeners.get(context);
+    if (!byType?.has(type)) return;
+
+    const handlers = byType.get(type);
+    const index = handlers.indexOf(listener);
+    if (index > -1) handlers.splice(index, 1);
+
+    if (handlers.length === 0) {
+        byType.delete(type);
+        const refs = typeIndex.get(type);
+        if (refs) {
+            for (const ref of refs) {
+                if (ref.deref() === context) {
+                    refs.delete(ref);
+                    break;
+                }
+            }
+        }
+    }
 }
 
-function dispatchLocally(event, context = undefined) {
+export function dispatchEvent(event, context = undefined) {
     if (!context) context = event instanceof CustomEvent ? event.detail?.target : event.target;
 
     if (context && contextListeners.has(context)) {
         const byType = contextListeners.get(context);
         byType.get(event.type)?.forEach(handler => handler(event));
     } else {
-        if (typeof window !== 'undefined') window.dispatchEvent(event);
-    }
-}
-
-export function addEventListener(type, listener, context = undefined) {
-    if (context && typeof context === 'object') { // context is well defined, should be a WebComponent
-        if (!contextListeners.has(context)) {
-            contextListeners.set(context, new Map());
+        const refs = typeIndex.get(event.type);
+        if (refs) {
+            for (const ref of refs) {
+                const ctx = ref.deref();
+                if (!ctx) { refs.delete(ref); continue; }
+                contextListeners.get(ctx)?.get(event.type)?.forEach(handler => handler(event));
+            }
         }
-        const byType = contextListeners.get(context);
-        if (!byType.has(type)) byType.set(type, []);
-        byType.get(type).push(listener);
-    } else {
-        if (context) throw new Error('Syntax error: context must be an object.');
-        if (typeof window !== 'undefined') window.addEventListener(type, listener);
     }
-}
-
-export function removeEventListener(type, listener, context = undefined) {
-    if (context && typeof context === 'object') {
-        const byType = contextListeners.get(context);
-        if (!byType?.has(type)) return;
-        const handlers = byType.get(type)
-        const index = handlers.indexOf(listener);
-        if (index > -1) handlers.splice(index, 1);
-        if (handlers.length === 0) byType.delete(type);
-    } else {
-        if (typeof window !== 'undefined') window.removeEventListener(type, listener);
-    }
-}
-
-export function dispatchEvent(event, context = undefined) {
-    dispatchLocally(event, context);
-    channel.postMessage({
-        type: event.type,
-        detail: event instanceof CustomEvent ? event.detail : {}
-    });
 }

@@ -6,7 +6,6 @@
     "description": "An event-bus for vanilla SPA. You can use it with web-components.",
     "homepage": "https://github.com/vanillaspa/event-bus#readme",
     "keywords": [
-        "BroadcastChannel",
         "CustomElement",
         "EventBus",
         "JavaScript",
@@ -14,6 +13,7 @@
         "Vanilla",
         "SPA",
         "WeakMap",
+        "WeakRef",
         "WebComponents"
     ],
     "license": "Unlicense",
@@ -27,5 +27,5 @@
         "url": "git+https://github.com/vanillaspa/event-bus.git"
     },
     "type": "module",
-    "version": "1.3.3"
+    "version": "1.4.0"
 }
