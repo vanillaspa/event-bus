@@ -12,7 +12,9 @@ export function addEventListener(type, listener, context) {
     byType.get(type).push(listener);
 
     if (!typeIndex.has(type)) typeIndex.set(type, new Set());
-    typeIndex.get(type).add(new WeakRef(context));
+    const refs = typeIndex.get(type);
+    const alreadyRegistered = [...refs].some(ref => ref.deref() === context);
+    if (!alreadyRegistered) refs.add(new WeakRef(context));
 }
 
 export function removeEventListener(type, listener, context) {
