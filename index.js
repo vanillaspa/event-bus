@@ -31,17 +31,12 @@ const typeIndex = new Map();
 /**
  * Register a listener for `type` events scoped to `context`.
  *
- * Multiple listeners for the same type on the same context are allowed and
- * fire in registration order. Re-registering the same context for a type it
- * already has listeners on is safe — the context's `WeakRef` is only added
- * once to `typeIndex`.
- *
  * @param {string} type - Event type string (e.g. `'sqlite:statement'`).
  * @param {function(Event): void} listener - Handler to invoke on dispatch.
  * @param {object} context - Scoping key, typically the component's host `HTMLElement`.
  */
 export function addEventListener(type, listener, context) {
-    if (!contextListeners.has(context)) { // first seen
+    if (!contextListeners.has(context)) {
         contextListeners.set(context, new Map());
         if (context instanceof HTMLElement && !autoCleanup.has(context)) {
             autoCleanup.add(context);
@@ -60,10 +55,6 @@ export function addEventListener(type, listener, context) {
 
 /**
  * Remove a previously registered listener.
- *
- * If removing the last listener for `type` on `context`, the context's
- * `WeakRef` is also pruned from `typeIndex`. No-ops silently if the
- * listener or context is not found.
  *
  * @param {string} type - Event type string.
  * @param {function(Event): void} listener - The exact listener reference to remove.
@@ -94,9 +85,6 @@ export function removeEventListener(type, listener, context) {
 /**
  * Remove all listeners registered under `context`, across all event types.
  *
- * Call this in a component's `disconnectedCallback` to promptly release
- * all handlers without waiting for GC.
- *
  * @param {object} context - The context whose listeners should all be removed.
  */
 export function removeAllEventListeners(context) {
@@ -114,13 +102,10 @@ export function removeAllEventListeners(context) {
 /**
  * Dispatch `event` to all matching listeners.
  *
- * **Routing:** If `context` is provided, only listeners registered under that
- * exact context receive the event. If `context` is omitted (or falsy), the bus
- * falls back to `event.detail?.target` (for `CustomEvent`) or `event.target` as
- * an implicit context. If that is also absent the event is delivered to **all**
- * registered listeners for its type (true broadcast).
- *
- * Dead `WeakRef`s encountered during dispatch are pruned on the fly.
+ * If `context` is provided, only listeners registered under that exact context
+ * receive the event. If omitted, falls back to `event.detail?.target` or
+ * `event.target` as an implicit context. If that is also absent the event is
+ * delivered to all registered listeners for its type (true broadcast).
  *
  * @param {Event|CustomEvent} event - The event to dispatch.
  * @param {object} [context] - Optional explicit routing context.
