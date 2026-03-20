@@ -123,3 +123,38 @@ export function dispatchEvent(event, context = undefined) {
         }
     }
 }
+
+// Bridge
+export function mountBridge(contract, host) {
+    const { namespace, events, handlers, responseDetail = {} } = contract;
+
+    for (const [action, { past }] of Object.entries(events)) {
+        addEventListener(`${namespace}:${action}`, async (event) => {
+            try {
+                const result = await handlers[action](event.detail);
+                const detail = responseDetail[action]?.(result, event.detail) ?? { result };
+                dispatchEvent(new CustomEvent(`${namespace}:${past}:${event.timeStamp}`, { detail }), host);
+            } catch (error) {
+                dispatchEvent(new CustomEvent(`${namespace}:error:${event.timeStamp}`, {
+                    detail: { error: error.message, action }
+                }), host);
+            }
+        }, host);
+    }
+}
+
+export function useContract(contract, host) {
+    const { namespace, events } = contract;
+
+    function call(action) {
+        return (detail) => new Promise((resolve, reject) => {
+            const req = new CustomEvent(`${namespace}:${action}`, { detail });
+            const { past } = events[action];
+            addEventListener(`${namespace}:${past}:${req.timeStamp}`, (e) => resolve(e.detail), host);
+            addEventListener(`${namespace}:error:${req.timeStamp}`, (e) => reject(new Error(e.detail.error)), host);
+            dispatchEvent(req, host);
+        });
+    }
+
+    return Object.fromEntries(Object.keys(events).map(action => [action, call(action)]));
+}
