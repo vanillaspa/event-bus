@@ -18,6 +18,11 @@
     ],
     "license": "Unlicense",
     "main": "index.js",
+    "exports": {
+        ".": "./index.js",
+        "./contract": "./contract.js",
+        "./validate": "./validate.js"
+    },
     "name": "@vanillaspa/event-bus",
     "publishConfig": {
         "access": "public"
