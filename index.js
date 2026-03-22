@@ -112,7 +112,6 @@ export function removeAllEventListeners(context) {
  */
 export function dispatchEvent(event, context = undefined) {
     if (!context) context = event instanceof CustomEvent ? event.detail?.target : event.target;
-
     const refs = typeIndex.get(event.type);
     if (refs) {
         for (const ref of refs) {
@@ -124,7 +123,7 @@ export function dispatchEvent(event, context = undefined) {
     }
 }
 
-// Bridge
+// Contract & Bridge
 export function mountBridge(contract, host) {
     const { namespace, events, handlers, responseDetail = {} } = contract;
 
